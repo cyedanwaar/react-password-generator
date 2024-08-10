@@ -1,71 +1,65 @@
-import { useState, useEffect } from 'react'
-function App() {
+import { useEffect, useState, useCallback, useRef } from "react"
 
-  const [password, setPassword] = useState("")
-  const [sliderValue, setSliderValue] = useState(8)
-  const [numbers, setNumbers] = useState(false)
-  const [characters, setCharacters] = useState(false)
+export default function App(){
+  const [length, setLength] = useState(6)
+  const [numberAllowed, setNumberAllowed] = useState(false)
+  const [characterAllowed, setCharacterAllowed] = useState(false)
+  const [password, setPassword] = useState('')
 
-  function generatePassword(){
-    const alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    const num_str = "0123456789"
-    const char_str = "!@#$%^&*()_+?><|}{~`-=\\"
-    let result = ""
-    let counter = 1;
+  const passwordRef = useRef(null)
 
-    let commulative_string = alphabets
+  const passwordGenerator = useCallback(()=>{
+    let pass = ""
+    let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
-    if(numbers && characters){
-      commulative_string += num_str
-      commulative_string += char_str
-    }else if(numbers){
-      commulative_string += num_str
-    }else if(characters){
-      commulative_string += char_str
-    }else{
-      commulative_string = alphabets
+    if (numberAllowed) str += "0123456789"
+    if (characterAllowed) str += "~!@#$%^&*()_+=-.,<>/?'\\}{|`"
+
+    for(let i = 1; i<=length; i++){
+      let char = Math.floor(Math.random() * (str.length + 1))
+      pass += str.charAt(char)
     }
 
-   
-    while (counter <= sliderValue){
-      result += commulative_string.charAt(Math.floor(Math.random() * commulative_string.length))
-      counter += 1
-    }
-    console.log(result, result.length)
-    setPassword(result)
-  }
+    setPassword(pass)
 
-  function copyToClipboard(){
-    navigator.clipboard.writeText(password)
-    console.log(`Password copied to clipboard: ${password}`)
-    alert("Password copied")
-  }
+    console.log(pass)
+
+  }, [length, numberAllowed, characterAllowed, setPassword])
+
+  const copyToClipBoard = useCallback(()=>{
+    passwordRef.current?.select()
+    window.navigator.clipboard.writeText(password)
+  }, [password])
+
 
   useEffect(()=>{
+    passwordGenerator()
+  }, [length, numberAllowed, characterAllowed])
 
-    console.log(`Slider Value: ${sliderValue}, Numbers: ${numbers}, Characters: ${characters}`)
-    generatePassword()
-  },[sliderValue, numbers, characters])
 
-  return (
+  return(
     <>
+      <div className="flex flex-col items-center justify-center bg-gray-300 w-[50vw] mt-5 rounded-lg">
+        <h1 className="text-gray-900 mt-4 text-4xl"> Password Generator</h1>
 
-    <div className='container'>
-      <div className='password-div'>
-        <p>{password}</p>
-        <button onClick={copyToClipboard}>Copy</button>
+        <div className="my-4 w-3/4 flex-nowrap flex justify-center">
+          <input type="text"
+          className="outline-none border-none rounded-l-lg px-2 py-1 w-4/5"
+          value={password}
+          placeholder="Password"
+          readOnly
+          ref={passwordRef}
+          />
+          <button onClick={copyToClipBoard} className="px-2 py-1 bg-green-600 hover:bg-green-500 transition-all rounded-r-lg">Copy</button>
+        </div>
+
+        <div className="flex flex-col justify-start items-start mb-4">
+            <div className="flex items-center justify-center gap-4"><input min={6} max={50} value={length} onChange={e=> setLength(e.target.value)} id="slider" type="range" /> <label htmlFor="slider">{`Length(${length})`}</label></div>
+            <div className="flex items-center justify-center gap-4"><input checked={numberAllowed} onChange={e=>setNumberAllowed(prev=>!prev)} id="numbers" type="checkbox" /> <label htmlFor="numbers">Numbers</label></div>
+            <div className="flex items-center justify-center gap-4"><input checked={characterAllowed} onChange={e=>setCharacterAllowed(prev=>!prev)} id="characters" type="checkbox" /> <label htmlFor="characters">Characters</label></div>
+        </div>
+
       </div>
-
-
-      <div className='options'>
-        <div><input type="range" max={30} min={8} value={sliderValue} onChange={e=>setSliderValue(e.target.value)} /><label>{`Length(${sliderValue})`}</label></div>
-        <div><input id='numbers' type="checkbox" checked={numbers} onChange={e=>setNumbers(e.target.checked)} /><label htmlFor="numbers">Numbers</label></div>
-        <div><input id='characters' type="checkbox" checked={characters} onChange={e=>setCharacters(e.target.checked)} /><label htmlFor="characters">Characters</label></div>
-      </div>
-    </div>
-     
     </>
   )
 }
-
-export default App

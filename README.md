@@ -1,12 +1,14 @@
-# React Password Generator
+# Modified React Password Generator
 
-     A password generator created in React JS.
+     This Password generator is a better version enhanced with tailwindcss and also used useCallback Hook for better optimization.
      
 ## Hooks used:
-    UseState()
-    UseEffect()
+    useState()
+    useEffect()
+    useRef()
+    useCallback()
 
-## Explanation
+## Explanation:
     A password is generated using Math.random() function.
     string.charAt(Math.floor(Math.random()*string.length))
 
